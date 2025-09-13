@@ -48,4 +48,3 @@ clean:
 # These targets are not actual files. Declaring them as .PHONY
 # ensures 'make' will run them even if a file with that name exists.
 .PHONY: all run clean
-```

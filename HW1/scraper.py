@@ -1,6 +1,7 @@
 import requests
 import json
 import time
+import re
 from random import randint
 from bs4 import BeautifulSoup
 from bs4.element import Tag
@@ -8,8 +9,6 @@ from bs4.element import Tag
 # --- Configuration ---
 # URL and selector specific to the Ask search engine
 ASK_SEARCH_URL = "http://www.ask.com/web?q="
-# The selector for Ask finds the title block of a search result.
-ASK_SELECTOR = ["div", {"class": "PartialSearchResults-item-title"}] 
 
 # User agent to mimic a real browser visit
 USER_AGENT = {
@@ -33,28 +32,56 @@ def scrape_ask_search(query: str) -> list:
         response = requests.get(search_url, headers=USER_AGENT)
         response.raise_for_status() # Raises an exception for bad status codes
 
+        # Debug: save the HTML file
+        with open('debug_ask_page.html', 'w', encoding='utf-8') as f:
+            f.write(response.text)
+
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # Find all result containers using the selector
-        raw_results = soup.find_all(ASK_SELECTOR[0], attrs=ASK_SELECTOR[1])
+        # Find all script tags
+        scripts = soup.find_all('script')
 
-        for result in raw_results:
-            # The link is in an 'a' tag within the selected div.
-            if isinstance(result, Tag):
-                link_tag = result.find('a')
-                if isinstance(link_tag, Tag):
-                    link = link_tag.get('href')
-                    if isinstance(link, str):
-                        if link.startswith('http') and link not in results:
-                            results.append(link)
-            
-            # Only collect the top 10 results
-            if len(results) >= 10:
-                break
+        # The data is stored in a script tag as a JavaScript variable assignment.
+        # We need to find the one that defines 'window.MESON.initialState'.
+        for script in scripts:
+            # Check if the script contains the data object we need
+            if isinstance(script, Tag) and script.string and 'window.MESON.initialState' in script.string:
                 
+                # Use regex to extract the JSON object from the script text
+                # It looks for 'window.MESON.initialState = ' followed by a JSON object {}
+                match = re.search(r'window\.MESON\.initialState\s*=\s*(\{.*\});', script.string)
+                
+                if match:
+                    json_str = match.group(1)
+                    
+                    # Parse the extracted string as JSON
+                    data = json.loads(json_str)
+                    
+                    # Navigate the nested dictionary to find the list of web results
+                    # Use .get() to prevent errors if a key is missing
+                    web_results = data.get('search', {}).get('webResults', {}).get('results', [])
+                    
+                    for result_item in web_results:
+                        # Extract the URL from each result item
+                        url = result_item.get('url')
+                        if url:
+                            results.append(url)
+                        
+                        # Stop once we have 10 results
+                        if len(results) >= 10:
+                            break
+                    
+                    # Once we've found and processed the data, we can exit the loop
+                    break 
     except requests.exceptions.RequestException as e:
-        print(f"Error scraping for query '{query}': {e}")
+        print(f"  > Network error scraping for query '{query}': {e}")
         # If a query fails, return an empty list or handle it as needed.
+        return []
+    except json.JSONDecodeError:
+        print(f"  > Failed to parse JSON data for query '{query}'.")
+        return []
+    except Exception as e:
+        print(f"  > An unexpected error occurred for query '{query}': {e}")
         return []
 
     return results
