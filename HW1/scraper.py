@@ -63,9 +63,10 @@ def scrape_ask_search(query: str) -> list:
                     
                     for result_item in web_results:
                         # Extract the URL from each result item
-                        url = result_item.get('url')
-                        if url:
-                            results.append(url)
+                        if result_item.get('resultType') == 'articleResult':
+                            url = result_item.get('url')
+                            if url and url not in results:
+                                results.append(url)
                         
                         # Stop once we have 10 results
                         if len(results) >= 10:
