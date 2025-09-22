@@ -6,8 +6,8 @@ PYTHON = python3
 # --- File Names ---
 SCRAPED_JSON = hw1.json
 FINAL_CSV = hw1.csv
-QUERIES_TXT = 100QueriesSet3.txt
-GOOGLE_JSON = Google_Result3.json
+QUERIES_TXT = 100QueriesSet4.txt
+GOOGLE_JSON = Google_Result4.json
 
 # --- Main Targets ---
 

@@ -2,7 +2,7 @@ import json
 import csv
 
 # --- Configuration ---
-GOOGLE_RESULTS_FILE = "Google_Result3.json"
+GOOGLE_RESULTS_FILE = "Google_Result4.json"
 SCRAPED_RESULTS_FILE = "hw1.json"
 OUTPUT_CSV_FILE = "hw1.csv"
 
