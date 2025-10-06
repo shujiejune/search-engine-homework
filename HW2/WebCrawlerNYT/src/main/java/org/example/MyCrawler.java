@@ -31,8 +31,8 @@ public class MyCrawler extends WebCrawler {
     }
 
     /**
-     * This method is called for every page that is fetched.
-     * We record its URL and the HTTP status code.
+     * This method is called for every page that is fetched,
+     * recording its URLs and the HTTP status codes.
      */
     @Override
     protected void handlePageStatusCode(WebURL webUrl, int statusCode, String statusDescription) {
@@ -47,16 +47,17 @@ public class MyCrawler extends WebCrawler {
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
         String domain = url.getDomain().toLowerCase();
+        boolean shouldVisit = domain.contains(DOMAIN);
 
         // Record all discovered URLs, inside or outside the news site domain.
-        if (domain.contains(DOMAIN)) {
+        if (shouldVisit) {
             urlsStats.put(escapeCsv(href), "OK");
         } else {
             urlsStats.put(escapeCsv(href), "N_OK");
         }
 
         // Only visit URLs that are not filtered and are within the news site domain.
-        return !FILTERS.matcher(href).matches() && domain.contains(DOMAIN);
+        return !FILTERS.matcher(href).matches() && shouldVisit;
     }
 
     /**
@@ -67,7 +68,7 @@ public class MyCrawler extends WebCrawler {
         String url = escapeCsv(page.getWebURL().getURL());
         String contentType = page.getContentType().split(";")[0]; // Get content type without charset
 
-        // We are interested in html, doc, pdf, and images.
+        // Only interested in html, doc, pdf, and images.
         boolean isAllowedType = contentType.startsWith("text/html") ||
                 contentType.startsWith("image/") ||
                 contentType.contains("application/msword") || // .doc
@@ -78,7 +79,10 @@ public class MyCrawler extends WebCrawler {
             int size = page.getContentData().length;
             int outlinks = 0;
 
+            // Check at the runtime, page.getParseData() returns a general class ParseData
             if (page.getParseData() instanceof HtmlParseData) {
+                // Cast because the compiler will look for the getOutgoingUrls() method
+                // but ParseData doesn't have it.
                 HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
                 Set<WebURL> links = htmlParseData.getOutgoingUrls();
                 outlinks = links.size();
@@ -90,7 +94,7 @@ public class MyCrawler extends WebCrawler {
 
     /**
      * A helper method to handle commas in data to prevent CSV format issues.
-     * Replaces commas with a hyphen as suggested by the assignment.
+     * Replaces commas with a hyphen.
      */
     private String escapeCsv(String data) {
         if (data == null) {
