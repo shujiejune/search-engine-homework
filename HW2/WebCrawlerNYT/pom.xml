@@ -40,13 +40,6 @@
             <artifactId>je</artifactId>
             <version>18.3.12</version>
         </dependency>
-
-        <!-- SLF4J is used for logging, which crawler4j requires -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>1.7.32</version>
-        </dependency>
     </dependencies>
 
     <build>

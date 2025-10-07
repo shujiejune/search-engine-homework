@@ -1,0 +1,6 @@
+2025-10-07 07:00:00.001 UTC INFO [data/crawl/frontier] Start verify of data files
+2025-10-07 07:00:00.110 UTC INFO [data/crawl/frontier] End verify of data files
+2025-10-07 07:00:00.110 UTC INFO [data/crawl/frontier] Start verify all databases
+2025-10-07 07:00:01.077 UTC INFO [data/crawl/frontier] End verify all databases
+2025-10-07 07:01:45.821 UTC INFO [data/crawl/frontier] JEErasure soft shutdown initiated.
+2025-10-07 07:01:45.822 UTC INFO [data/crawl/frontier] RepairReservedFiles-data/crawl/frontier soft shutdown initiated.

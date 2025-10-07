@@ -1,0 +1,45 @@
+Name:
+USC ID:
+News site crawled: nytimes.com
+Number of threads: 7
+
+Fetch Statistics
+================
+# fetches attempted: 9832
+# fetches succeeded: 9482
+# fetches failed or aborted: 350
+
+Outgoing URLs:
+==============
+Total URLs extracted: 829870
+# unique URLs extracted: 116361
+# unique URLs within News Site: 96866
+# unique URLs outside News Site: 19495
+
+Status Codes:
+=============
+200: 9482
+301: 267
+302: 46
+308: 28
+403: 3
+404: 5
+503: 1
+
+File Sizes:
+===========
+< 1KB: 4
+1KB ~ <10KB: 577
+10KB ~ <100KB: 3147
+100KB ~ <1MB: 5285
+>= 1MB: 385
+
+Content Types:
+==============
+image/gif: 5
+image/jpeg: 3430
+image/png: 405
+image/svg+xml: 12
+image/vnd.microsoft.icon: 1
+image/x-icon: 3
+text/html: 5542

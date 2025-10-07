@@ -12,10 +12,14 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+/**
+ * WebCrawler.java class reference:
+ * https://github.com/yasserg/crawler4j/blob/master/crawler4j/src/main/java/edu/uci/ics/crawler4j/crawler/WebCrawler.java
+ */
 public class MyCrawler extends WebCrawler {
     // Regex to match file extensions to avoid.
     private final static Pattern FILTERS = Pattern.compile(".*(\\.(css|js|json|mp3|zip|gz))$");
-    private final static String DOMAIN = "https://www.nytimes.com/";
+    private final String[] ALLOWED_DOMAINS = {"nytimes.com", "nyt.com"};
 
     // Shared data structures to hold statistics from all threads.
     private final ConcurrentHashMap<String, String> fetchStats;
@@ -41,27 +45,53 @@ public class MyCrawler extends WebCrawler {
     }
 
     /**
+     * This method is called for client and server errors (4xx, 5xx).
+     * The signature MUST use String urlStr.
+     */
+    @Override
+    protected void onUnexpectedStatusCode(String urlStr, int statusCode, String contentType, String description) {
+        String url = escapeCsv(urlStr);
+        fetchStats.put(url, String.valueOf(statusCode));
+    }
+
+    /**
+     * This method is called when the crawler successfully fetches the headers (e.g., gets a 200 OK),
+     * but fails to download the content/body of the page.
+     */
+    @Override
+    protected void onContentFetchError(WebURL webUrl) {
+        String url = escapeCsv(webUrl.getURL());
+        // We use a custom code "0" to indicate this specific type of content fetch error.
+        fetchStats.put(url, "0");
+    }
+
+    /**
      * This method decides if a URL should be crawled or not.
+     * This method was completed with the help of Gemini.
      */
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         String href = url.getURL().toLowerCase();
         String domain = url.getDomain().toLowerCase();
-        boolean shouldVisit = domain.contains(DOMAIN);
 
-        // Record all discovered URLs, inside or outside the news site domain.
-        if (shouldVisit) {
-            urlsStats.put(escapeCsv(href), "OK");
-        } else {
-            urlsStats.put(escapeCsv(href), "N_OK");
+        boolean isAllowedDomain = false;
+        for (String allowed : ALLOWED_DOMAINS) {
+            if (domain.endsWith(allowed)) {
+                isAllowedDomain = true;
+                break;
+            }
         }
 
+        // Record all discovered URLs and their status (OK or N_OK)
+        urlsStats.put(escapeCsv(href), isAllowedDomain ? "OK" : "N_OK");
+
         // Only visit URLs that are not filtered and are within the news site domain.
-        return !FILTERS.matcher(href).matches() && shouldVisit;
+        return !FILTERS.matcher(href).matches() && isAllowedDomain;
     }
 
     /**
      * This method is called when a page is successfully downloaded and parsed.
+     * This method was completed with the help of Gemini.
      */
     @Override
     public void visit(Page page) {
@@ -123,6 +153,7 @@ public class MyCrawler extends WebCrawler {
 
     /**
      * A static utility method to write visit-specific statistics to a CSV file.
+     * This method was completed with the help of Gemini.
      */
     public static void writeVisitStatsToCsv(String filename, Map<String, VisitStat> stats, String[] headers) {
         try (FileWriter writer = new FileWriter(filename)) {

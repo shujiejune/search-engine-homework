@@ -9,7 +9,6 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-/* This program was completed with the help of Gemini.*/
 public class Controller {
     public static void main(String[] args) throws Exception {
         // The folder where fetched data will be stored.

@@ -1,0 +1,4 @@
+Workflow:
+1. For every discovered unique url, put it in urls_nytimes.csv. If it resides in the page, mark the indicator to be "OK"; otherwise, mark the indicator to be"N_OK".
+2. Filter all the urls by extensions and domain names with shouldVisit(), and put all the unique urls in fetch_nytimes.csv
+3. Apply visit() to filter the successfully fetched (status code == 200 OK) urls by content-type, the urls of type in {"text/html", "image/", "application/msword", "application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"} are put in visit_nytimes.csv
