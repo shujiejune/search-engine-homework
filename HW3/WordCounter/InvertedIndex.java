@@ -17,12 +17,20 @@ public class InvertedIndex {
     // The Mapper outputs (word, docID)
     public static class IndexMapper extends Mapper<Object, Text, Text, Text> {
 
+        private Map<String, Integer> wordCounts;
+        private String currDocID = null;
         private Text word = new Text();
         private Text docIDText = new Text();
 
         private long wordCounter = 0;
         private final static long MAX_WORDS = 50000;
 
+        @Override
+        protected void setup(Context context) throws IOException, InterruptedException {
+            wordCounts = new HashMap<>();
+        }
+
+        @Override
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 
             if (wordCounter >= MAX_WORDS) {
@@ -38,7 +46,10 @@ public class InvertedIndex {
                 return;
             }
 
-            String docID = parts[0];
+            if (currDocID == null) {
+                currDocID = parts[0];
+            }
+
             String contents = parts[1];
 
             contents = contents.toLowerCase();
@@ -46,16 +57,27 @@ public class InvertedIndex {
             // Replace all punctuation (not a lowercase letter or whitespace) and numerals with a space
             contents = contents.replaceAll("[^a-z\\s]", " ");
 
-            docIDText.set(docID);
-
             StringTokenizer itr = new StringTokenizer(contents);
             while (itr.hasMoreTokens()) {
                 if (wordCounter >= MAX_WORDS) {
                     break;
                 }
                 word.set(itr.nextToken());
-                context.write(word, docIDText);
+                wordCounts.put(word, wordCounts.getOrDefault(word, 0) + 1);
                 wordCounter++;
+            }
+        }
+
+        @Override
+        public void cleanup(Context context) throws IOException, InterruptedException {
+            if (currDocID == null) {
+                return;
+            }
+
+            for (Map.Entry<String, Integer> entry : wordCounts.entrySet()) {
+                wordText.set(entry.getKey());
+                docCountText.set(currentDocID + ":" + entry.getValue());
+                context.write(wordText, docCountText);
             }
         }
     }
@@ -67,25 +89,16 @@ public class InvertedIndex {
 
         public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
 
-            Map<String, Integer> counts = new HashMap<String, Integer>();
-
-            for (Text val : values) {
-                String docID = val.toString();
-                counts.put(docID, counts.getOrDefault(docID, 0) + 1);
-            }
-
             StringBuilder postingList = new StringBuilder();
             boolean first = true;
 
-            for (Map.Entry<String, Integer> entry : counts.entrySet()) {
+            for (Text val : values) {
                 if (first) {
                     first = false;
                 } else {
                     postingList.append(";");
                 }
-                postingList.append(entry.getKey());   // docID
-                postingList.append(":");
-                postingList.append(entry.getValue()); // count
+                postingList.append(val.toString());
             }
 
             result.set(postingList.toString());
