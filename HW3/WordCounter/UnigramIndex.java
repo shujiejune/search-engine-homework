@@ -12,15 +12,15 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-public class InvertedIndex {
+public class UnigramIndex {
 
     // The Mapper outputs (word, docID)
     public static class IndexMapper extends Mapper<Object, Text, Text, Text> {
 
         private Map<String, Integer> wordCounts;
         private String currDocID = null;
-        private Text word = new Text();
-        private Text docIDText = new Text();
+        private Text wordText = new Text();
+        private Text docCountText = new Text();
 
         private long wordCounter = 0;
         private final static long MAX_WORDS = 50000;
@@ -62,7 +62,7 @@ public class InvertedIndex {
                 if (wordCounter >= MAX_WORDS) {
                     break;
                 }
-                word.set(itr.nextToken());
+                String word = itr.nextToken();
                 wordCounts.put(word, wordCounts.getOrDefault(word, 0) + 1);
                 wordCounter++;
             }
@@ -76,7 +76,7 @@ public class InvertedIndex {
 
             for (Map.Entry<String, Integer> entry : wordCounts.entrySet()) {
                 wordText.set(entry.getKey());
-                docCountText.set(currentDocID + ":" + entry.getValue());
+                docCountText.set(currDocID + ":" + entry.getValue());
                 context.write(wordText, docCountText);
             }
         }
