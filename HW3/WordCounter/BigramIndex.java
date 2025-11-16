@@ -75,13 +75,13 @@ public class BigramIndex {
 
         @Override
         protected void cleanup(Context context) throws IOException, InterruptedException {
-            if (currentDocID == null) {
+            if (currDocID == null) {
                 return;
             }
 
             for (Map.Entry<String, Integer> entry : bigramCounts.entrySet()) {
                 bigramText.set(entry.getKey());
-                docCountText.set(currentDocID + ":" + entry.getValue());
+                docCountText.set(currDocID + ":" + entry.getValue());
                 context.write(bigramText, docCountText);
             }
         }
