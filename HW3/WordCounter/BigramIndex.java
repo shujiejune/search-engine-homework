@@ -19,7 +19,7 @@ public class BigramIndex {
     public static class IndexMapper extends Mapper<Object, Text, Text, Text> {
 
         private Map<String, Integer> bigramCounts;
-        private String currentDocID = null;
+        private String currDocID = null;
         private Text bigramText = new Text();
         private Text docCountText = new Text();
         private Set<String> selectedBigrams;
