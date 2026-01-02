@@ -1,0 +1,11 @@
+/.settings
+
+/*/in
+/*/lib
+/*/out
+
+.class
+.classpath
+.project
+.replit
+/*/.idea
